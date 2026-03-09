@@ -24,6 +24,7 @@ from comfy_api_nodes.util import (
     bytesio_to_image_tensor,
     download_url_to_bytesio,
     download_url_to_file_3d,
+    download_url_to_image_tensor,
     downscale_image_tensor_by_max_side,
     poll_op,
     sync_op,
@@ -507,7 +508,8 @@ class Tencent3DTextureEditNode(IO.ComfyNode):
             ],
             outputs=[
                 IO.File3DGLB.Output(display_name="GLB"),
-                IO.File3DFBX.Output(display_name="FBX"),
+                IO.File3DOBJ.Output(display_name="OBJ"),
+                IO.Image.Output(display_name="texture_image"),
             ],
             hidden=[
                 IO.Hidden.auth_token_comfy_org,
@@ -556,7 +558,8 @@ class Tencent3DTextureEditNode(IO.ComfyNode):
         )
         return IO.NodeOutput(
             await download_url_to_file_3d(get_file_from_response(result.ResultFile3Ds, "glb").Url, "glb"),
-            await download_url_to_file_3d(get_file_from_response(result.ResultFile3Ds, "fbx").Url, "fbx"),
+            await download_url_to_file_3d(get_file_from_response(result.ResultFile3Ds, "obj").Url, "obj"),
+            await download_url_to_image_tensor(get_file_from_response(result.ResultFile3Ds, "texture_image").Url),
         )
 
 
@@ -730,7 +733,7 @@ class TencentHunyuan3DExtension(ComfyExtension):
             TencentTextToModelNode,
             TencentImageToModelNode,
             TencentModelTo3DUVNode,
-            # Tencent3DTextureEditNode,
+            Tencent3DTextureEditNode,
             Tencent3DPartNode,
             TencentSmartTopologyNode,
         ]
