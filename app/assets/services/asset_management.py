@@ -116,7 +116,7 @@ def update_asset_metadata(
             set_reference_preview(
                 session,
                 reference_id=reference_id,
-                preview_asset_id=preview_id,
+                preview_reference_id=preview_id,
             )
             touched = True
 
@@ -202,7 +202,7 @@ def delete_asset_reference(
 
 def set_asset_preview(
     reference_id: str,
-    preview_asset_id: str | None = None,
+    preview_reference_id: str | None = None,
     owner_id: str = "",
 ) -> AssetDetailResult:
     with create_session() as session:
@@ -211,7 +211,7 @@ def set_asset_preview(
         set_reference_preview(
             session,
             reference_id=reference_id,
-            preview_asset_id=preview_asset_id,
+            preview_reference_id=preview_reference_id,
         )
 
         result = fetch_reference_asset_and_tags(

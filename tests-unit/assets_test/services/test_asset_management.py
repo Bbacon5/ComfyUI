@@ -220,31 +220,33 @@ class TestSetAssetPreview:
         asset = _make_asset(session, hash_val="blake3:main")
         preview_asset = _make_asset(session, hash_val="blake3:preview")
         ref = _make_reference(session, asset)
+        preview_ref = _make_reference(session, preview_asset, name="preview.png")
         ref_id = ref.id
-        preview_id = preview_asset.id
+        preview_ref_id = preview_ref.id
         session.commit()
 
         set_asset_preview(
             reference_id=ref_id,
-            preview_asset_id=preview_id,
+            preview_reference_id=preview_ref_id,
         )
 
         # Verify by re-fetching from DB
         session.expire_all()
         updated_ref = session.get(AssetReference, ref_id)
-        assert updated_ref.preview_id == preview_id
+        assert updated_ref.preview_id == preview_ref_id
 
     def test_clears_preview(self, mock_create_session, session: Session):
         asset = _make_asset(session)
         preview_asset = _make_asset(session, hash_val="blake3:preview")
         ref = _make_reference(session, asset)
-        ref.preview_id = preview_asset.id
+        preview_ref = _make_reference(session, preview_asset, name="preview.png")
+        ref.preview_id = preview_ref.id
         ref_id = ref.id
         session.commit()
 
         set_asset_preview(
             reference_id=ref_id,
-            preview_asset_id=None,
+            preview_reference_id=None,
         )
 
         # Verify by re-fetching from DB
@@ -264,7 +266,7 @@ class TestSetAssetPreview:
         with pytest.raises(PermissionError, match="not owner"):
             set_asset_preview(
                 reference_id=ref.id,
-                preview_asset_id=None,
+                preview_reference_id=None,
                 owner_id="user2",
             )
 

@@ -137,6 +137,21 @@ def reference_exists_for_asset_id(
     return session.execute(q).first() is not None
 
 
+def reference_exists(
+    session: Session,
+    reference_id: str,
+) -> bool:
+    """Return True if a reference with the given ID exists (not soft-deleted)."""
+    q = (
+        select(sa.literal(True))
+        .select_from(AssetReference)
+        .where(AssetReference.id == reference_id)
+        .where(AssetReference.deleted_at.is_(None))
+        .limit(1)
+    )
+    return session.execute(q).first() is not None
+
+
 def insert_reference(
     session: Session,
     asset_id: str,
@@ -496,19 +511,19 @@ def soft_delete_reference_by_id(
 def set_reference_preview(
     session: Session,
     reference_id: str,
-    preview_asset_id: str | None = None,
+    preview_reference_id: str | None = None,
 ) -> None:
     """Set or clear preview_id and bump updated_at. Raises on unknown IDs."""
     ref = session.get(AssetReference, reference_id)
     if not ref:
         raise ValueError(f"AssetReference {reference_id} not found")
 
-    if preview_asset_id is None:
+    if preview_reference_id is None:
         ref.preview_id = None
     else:
-        if not session.get(Asset, preview_asset_id):
-            raise ValueError(f"Preview Asset {preview_asset_id} not found")
-        ref.preview_id = preview_asset_id
+        if not session.get(AssetReference, preview_reference_id):
+            raise ValueError(f"Preview AssetReference {preview_reference_id} not found")
+        ref.preview_id = preview_reference_id
 
     ref.updated_at = get_utc_now()
     session.flush()

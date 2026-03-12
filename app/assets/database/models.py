@@ -45,13 +45,7 @@ class Asset(Base):
         passive_deletes=True,
     )
 
-    preview_of: Mapped[list[AssetReference]] = relationship(
-        "AssetReference",
-        back_populates="preview_asset",
-        primaryjoin=lambda: Asset.id == foreign(AssetReference.preview_id),
-        foreign_keys=lambda: [AssetReference.preview_id],
-        viewonly=True,
-    )
+    # preview_id on AssetReference is a self-referential FK to asset_references.id
 
     __table_args__ = (
         Index("uq_assets_hash", "hash", unique=True),
@@ -91,7 +85,7 @@ class AssetReference(Base):
     owner_id: Mapped[str] = mapped_column(String(128), nullable=False, default="")
     name: Mapped[str] = mapped_column(String(512), nullable=False)
     preview_id: Mapped[str | None] = mapped_column(
-        String(36), ForeignKey("assets.id", ondelete="SET NULL")
+        String(36), ForeignKey("asset_references.id", ondelete="SET NULL")
     )
     user_metadata: Mapped[dict[str, Any] | None] = mapped_column(
         JSON(none_as_null=True)
@@ -119,10 +113,10 @@ class AssetReference(Base):
         foreign_keys=[asset_id],
         lazy="selectin",
     )
-    preview_asset: Mapped[Asset | None] = relationship(
-        "Asset",
-        back_populates="preview_of",
+    preview_ref: Mapped[AssetReference | None] = relationship(
+        "AssetReference",
         foreign_keys=[preview_id],
+        remote_side=lambda: [AssetReference.id],
     )
 
     metadata_entries: Mapped[list[AssetReferenceMeta]] = relationship(

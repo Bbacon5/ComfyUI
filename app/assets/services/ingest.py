@@ -11,10 +11,10 @@ from app.assets.database.queries import (
     add_tags_to_reference,
     fetch_reference_and_asset,
     get_asset_by_hash,
-    get_existing_asset_ids,
     get_reference_by_file_path,
     get_reference_tags,
     get_or_create_reference,
+    reference_exists,
     remove_missing_tag_for_asset_id,
     set_reference_metadata,
     set_reference_tags,
@@ -66,7 +66,7 @@ def _ingest_file_from_path(
 
     with create_session() as session:
         if preview_id:
-            if preview_id not in get_existing_asset_ids(session, [preview_id]):
+            if not reference_exists(session, preview_id):
                 preview_id = None
 
         asset, asset_created, asset_updated = upsert_asset(
