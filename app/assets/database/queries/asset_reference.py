@@ -843,6 +843,22 @@ def bulk_update_is_missing(
     return total
 
 
+def update_is_missing_by_asset_id(
+    session: Session, asset_id: str, value: bool
+) -> int:
+    """Set is_missing flag for ALL references belonging to an asset.
+
+    Returns: Number of rows updated
+    """
+    result = session.execute(
+        sa.update(AssetReference)
+        .where(AssetReference.asset_id == asset_id)
+        .where(AssetReference.deleted_at.is_(None))
+        .values(is_missing=value)
+    )
+    return result.rowcount
+
+
 def delete_references_by_ids(session: Session, reference_ids: list[str]) -> int:
     """Delete references by their IDs.
 
