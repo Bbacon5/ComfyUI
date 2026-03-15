@@ -977,7 +977,7 @@ class CLIPLoader:
     @classmethod
     def INPUT_TYPES(s):
         return {"required": { "clip_name": (folder_paths.get_filename_list("text_encoders"), ),
-                              "type": (["stable_diffusion", "stable_cascade", "sd3", "stable_audio", "mochi", "ltxv", "pixart", "cosmos", "lumina2", "wan", "hidream", "chroma", "ace", "omnigen2", "qwen_image", "hunyuan_image", "flux2", "ovis"], ),
+                              "type": (["stable_diffusion", "stable_cascade", "sd3", "stable_audio", "mochi", "ltxv", "pixart", "cosmos", "lumina2", "wan", "hidream", "chroma", "ace", "omnigen2", "qwen_image", "hunyuan_image", "flux2", "ovis", "longcat_image"], ),
                               },
                 "optional": {
                               "device": (["default", "cpu"], {"advanced": True}),
@@ -1725,6 +1725,8 @@ class LoadImage:
         output_masks = []
         w, h = None, None
 
+        dtype = comfy.model_management.intermediate_dtype()
+
         for i in ImageSequence.Iterator(img):
             i = node_helpers.pillow(ImageOps.exif_transpose, i)
 
@@ -1749,8 +1751,8 @@ class LoadImage:
                 mask = 1. - torch.from_numpy(mask)
             else:
                 mask = torch.zeros((64,64), dtype=torch.float32, device="cpu")
-            output_images.append(image)
-            output_masks.append(mask.unsqueeze(0))
+            output_images.append(image.to(dtype=dtype))
+            output_masks.append(mask.unsqueeze(0).to(dtype=dtype))
 
             if img.format == "MPO":
                 break  # ignore all frames except the first one for MPO format
@@ -1928,7 +1930,6 @@ class ImageInvert:
 
 class ImageBatch:
     SEARCH_ALIASES = ["combine images", "merge images", "stack images"]
-    ESSENTIALS_CATEGORY = "Image Tools"
 
     @classmethod
     def INPUT_TYPES(s):
@@ -2439,6 +2440,7 @@ async def init_builtin_extra_nodes():
         "nodes_audio_encoder.py",
         "nodes_rope.py",
         "nodes_logic.py",
+        "nodes_resolution.py",
         "nodes_nop.py",
         "nodes_kandinsky5.py",
         "nodes_wanmove.py",
@@ -2451,6 +2453,9 @@ async def init_builtin_extra_nodes():
         "nodes_toolkit.py",
         "nodes_replacements.py",
         "nodes_nag.py",
+        "nodes_sdpose.py",
+        "nodes_math.py",
+        "nodes_painter.py",
     ]
 
     import_failed = []
