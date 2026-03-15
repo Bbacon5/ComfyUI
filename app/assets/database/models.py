@@ -150,6 +150,7 @@ class AssetReference(Base):
         Index("ix_asset_references_created_at", "created_at"),
         Index("ix_asset_references_last_access_time", "last_access_time"),
         Index("ix_asset_references_deleted_at", "deleted_at"),
+        Index("ix_asset_references_preview_id", "preview_id"),
         Index("ix_asset_references_owner_name", "owner_id", "name"),
         CheckConstraint(
             "(mtime_ns IS NULL) OR (mtime_ns >= 0)", name="ck_ar_mtime_nonneg"

@@ -44,12 +44,16 @@ def upgrade() -> None:
             ["id"],
             ondelete="SET NULL",
         )
+        batch_op.create_index(
+            "ix_asset_references_preview_id", ["preview_id"]
+        )
 
 
 def downgrade() -> None:
     with op.batch_alter_table(
         "asset_references", naming_convention=NAMING_CONVENTION
     ) as batch_op:
+        batch_op.drop_index("ix_asset_references_preview_id")
         batch_op.drop_constraint(
             "fk_asset_references_preview_id_asset_references", type_="foreignkey"
         )
