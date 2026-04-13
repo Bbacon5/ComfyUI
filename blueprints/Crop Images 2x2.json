@@ -1,6 +1,6 @@
 {
   "revision": 0,
-  "last_node_id": 135,
+  "last_node_id": 139,
   "last_link_id": 0,
   "nodes": [
     {
@@ -263,10 +263,9 @@
                 "links": [
                   7,
                   14,
-                  26,
                   28,
-                  37,
-                  40
+                  40,
+                  242
                 ]
               }
             ],
@@ -281,7 +280,7 @@
               "Node name for S&R": "ComfyMathExpression"
             },
             "widgets_values": [
-              "a/b"
+              "max(1, int(a/b))"
             ]
           },
           {
@@ -312,7 +311,8 @@
                 "name": "width",
                 "type": "INT",
                 "links": [
-                  3
+                  3,
+                  241
                 ]
               },
               {
@@ -320,7 +320,8 @@
                 "name": "height",
                 "type": "INT",
                 "links": [
-                  5
+                  5,
+                  245
                 ]
               },
               {
@@ -597,11 +598,10 @@
                 "type": "INT",
                 "links": [
                   8,
-                  15,
                   23,
                   27,
-                  38,
-                  39
+                  39,
+                  246
                 ]
               }
             ],
@@ -616,7 +616,167 @@
               "Node name for S&R": "ComfyMathExpression"
             },
             "widgets_values": [
-              "a/b"
+              "max(1, int(a/b))"
+            ]
+          },
+          {
+            "id": 138,
+            "type": "ComfyMathExpression",
+            "pos": [
+              1170,
+              1210
+            ],
+            "size": [
+              420,
+              190
+            ],
+            "flags": {},
+            "order": 13,
+            "mode": 0,
+            "inputs": [
+              {
+                "label": "a",
+                "localized_name": "values.a",
+                "name": "values.a",
+                "type": "FLOAT,INT",
+                "link": 241
+              },
+              {
+                "label": "b",
+                "localized_name": "values.b",
+                "name": "values.b",
+                "shape": 7,
+                "type": "FLOAT,INT",
+                "link": 242
+              },
+              {
+                "label": "c",
+                "localized_name": "values.c",
+                "name": "values.c",
+                "shape": 7,
+                "type": "FLOAT,INT",
+                "link": null
+              },
+              {
+                "localized_name": "expression",
+                "name": "expression",
+                "type": "STRING",
+                "widget": {
+                  "name": "expression"
+                },
+                "link": null
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "FLOAT",
+                "name": "FLOAT",
+                "type": "FLOAT",
+                "links": null
+              },
+              {
+                "localized_name": "INT",
+                "name": "INT",
+                "type": "INT",
+                "links": [
+                  243,
+                  244
+                ]
+              }
+            ],
+            "title": "Math Expression (Right Width)",
+            "properties": {
+              "ue_properties": {
+                "widget_ue_connectable": {},
+                "version": "7.7",
+                "input_ue_unconnectable": {}
+              },
+              "cnr_id": "comfy-core",
+              "ver": "0.18.1",
+              "Node name for S&R": "ComfyMathExpression"
+            },
+            "widgets_values": [
+              "max(1, a - b)"
+            ]
+          },
+          {
+            "id": 139,
+            "type": "ComfyMathExpression",
+            "pos": [
+              1170,
+              1860
+            ],
+            "size": [
+              420,
+              190
+            ],
+            "flags": {},
+            "order": 14,
+            "mode": 0,
+            "inputs": [
+              {
+                "label": "a",
+                "localized_name": "values.a",
+                "name": "values.a",
+                "type": "FLOAT,INT",
+                "link": 245
+              },
+              {
+                "label": "b",
+                "localized_name": "values.b",
+                "name": "values.b",
+                "shape": 7,
+                "type": "FLOAT,INT",
+                "link": 246
+              },
+              {
+                "label": "c",
+                "localized_name": "values.c",
+                "name": "values.c",
+                "shape": 7,
+                "type": "FLOAT,INT",
+                "link": null
+              },
+              {
+                "localized_name": "expression",
+                "name": "expression",
+                "type": "STRING",
+                "widget": {
+                  "name": "expression"
+                },
+                "link": null
+              }
+            ],
+            "outputs": [
+              {
+                "localized_name": "FLOAT",
+                "name": "FLOAT",
+                "type": "FLOAT",
+                "links": null
+              },
+              {
+                "localized_name": "INT",
+                "name": "INT",
+                "type": "INT",
+                "links": [
+                  247,
+                  248
+                ]
+              }
+            ],
+            "title": "Math Expression (Bottom Height)",
+            "properties": {
+              "ue_properties": {
+                "widget_ue_connectable": {},
+                "version": "7.7",
+                "input_ue_unconnectable": {}
+              },
+              "cnr_id": "comfy-core",
+              "ver": "0.18.1",
+              "Node name for S&R": "ComfyMathExpression"
+            },
+            "widgets_values": [
+              "max(1, a - b)"
             ]
           },
           {
@@ -733,7 +893,7 @@
                 "widget": {
                   "name": "height"
                 },
-                "link": 15
+                "link": 247
               }
             ],
             "outputs": [
@@ -803,7 +963,7 @@
                 "widget": {
                   "name": "width"
                 },
-                "link": 26
+                "link": 243
               },
               {
                 "localized_name": "height",
@@ -1012,7 +1172,7 @@
                 "widget": {
                   "name": "width"
                 },
-                "link": 37
+                "link": 244
               },
               {
                 "localized_name": "height",
@@ -1021,7 +1181,7 @@
                 "widget": {
                   "name": "height"
                 },
-                "link": 38
+                "link": 248
               }
             ],
             "outputs": [
@@ -1224,8 +1384,8 @@
             "type": "INT"
           },
           {
-            "id": 15,
-            "origin_id": 13,
+            "id": 247,
+            "origin_id": 139,
             "origin_slot": 1,
             "target_id": 16,
             "target_slot": 3,
@@ -1240,8 +1400,8 @@
             "type": "INT"
           },
           {
-            "id": 26,
-            "origin_id": 7,
+            "id": 243,
+            "origin_id": 138,
             "origin_slot": 1,
             "target_id": 25,
             "target_slot": 2,
@@ -1288,19 +1448,51 @@
             "type": "INT"
           },
           {
-            "id": 37,
-            "origin_id": 7,
+            "id": 244,
+            "origin_id": 138,
             "origin_slot": 1,
             "target_id": 32,
             "target_slot": 2,
             "type": "INT"
           },
           {
-            "id": 38,
-            "origin_id": 13,
+            "id": 248,
+            "origin_id": 139,
             "origin_slot": 1,
             "target_id": 32,
             "target_slot": 3,
+            "type": "INT"
+          },
+          {
+            "id": 241,
+            "origin_id": 8,
+            "origin_slot": 0,
+            "target_id": 138,
+            "target_slot": 0,
+            "type": "INT"
+          },
+          {
+            "id": 242,
+            "origin_id": 7,
+            "origin_slot": 1,
+            "target_id": 138,
+            "target_slot": 1,
+            "type": "INT"
+          },
+          {
+            "id": 245,
+            "origin_id": 8,
+            "origin_slot": 1,
+            "target_id": 139,
+            "target_slot": 0,
+            "type": "INT"
+          },
+          {
+            "id": 246,
+            "origin_id": 13,
+            "origin_slot": 1,
+            "target_id": 139,
+            "target_slot": 1,
             "type": "INT"
           },
           {
