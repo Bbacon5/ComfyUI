@@ -1,0 +1,69 @@
+{
+    "1": {
+        "inputs": {
+            "width": 256,
+            "height": 256,
+            "batch_size": 1,
+            "color": 16711680
+        },
+        "class_type": "EmptyImage",
+        "_meta": {
+            "title": "RGB image (3 channels, red)"
+        }
+    },
+    "2": {
+        "inputs": {
+            "width": 256,
+            "height": 256,
+            "batch_size": 1,
+            "color": 255
+        },
+        "class_type": "EmptyImage",
+        "_meta": {
+            "title": "Base image for RGBA (blue)"
+        }
+    },
+    "3": {
+        "inputs": {
+            "value": 0.5,
+            "width": 256,
+            "height": 256
+        },
+        "class_type": "SolidMask",
+        "_meta": {
+            "title": "Alpha mask (0.5)"
+        }
+    },
+    "4": {
+        "inputs": {
+            "image": ["2", 0],
+            "alpha": ["3", 0]
+        },
+        "class_type": "JoinImageWithAlpha",
+        "_meta": {
+            "title": "RGBA image (4 channels)"
+        }
+    },
+    "5": {
+        "inputs": {
+            "image1": ["1", 0],
+            "image2": ["4", 0],
+            "blend_factor": 0.5,
+            "blend_mode": "normal"
+        },
+        "class_type": "ImageBlend",
+        "_meta": {
+            "title": "Blend RGB (3ch) + RGBA (4ch) - exercises CORE-103 fix"
+        }
+    },
+    "6": {
+        "inputs": {
+            "filename_prefix": "image_blend_channel_test",
+            "images": ["5", 0]
+        },
+        "class_type": "SaveImage",
+        "_meta": {
+            "title": "Save blended output (will be RGBA)"
+        }
+    }
+}
