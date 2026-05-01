@@ -60,18 +60,38 @@ def _make_flux_schnell_comfyui_sd():
 
 
 class TestModelDetection:
-    """Verify that first-match model detection selects the correct model
-    based on list ordering and unet_config specificity."""
+    """Verify that model detection selects the most specific model regardless of
+    the ordering of entries in ``comfy.supported_models.models``."""
 
-    def test_longcat_before_schnell_in_models_list(self):
-        """LongCatImage must appear before FluxSchnell in the models list."""
-        models = comfy.supported_models.models
-        longcat_idx = next(i for i, m in enumerate(models) if m.__name__ == "LongCatImage")
-        schnell_idx = next(i for i, m in enumerate(models) if m.__name__ == "FluxSchnell")
-        assert longcat_idx < schnell_idx, (
-            f"LongCatImage (index {longcat_idx}) must come before "
-            f"FluxSchnell (index {schnell_idx}) in the models list"
-        )
+    def test_longcat_detection_is_order_independent(self):
+        """Detection must pick LongCatImage over FluxSchnell regardless of
+        their relative order in the models list, because LongCatImage has a
+        strictly more specific ``unet_config``."""
+        original_models = comfy.supported_models.models
+        sd = _make_longcat_comfyui_sd()
+        unet_config = detect_unet_config(sd, "")
+
+        try:
+            for ordering in ("longcat_first", "schnell_first"):
+                models = list(original_models)
+                longcat = next(m for m in models if m.__name__ == "LongCatImage")
+                schnell = next(m for m in models if m.__name__ == "FluxSchnell")
+                models.remove(longcat)
+                models.remove(schnell)
+                if ordering == "longcat_first":
+                    models.extend([longcat, schnell])
+                else:
+                    models.extend([schnell, longcat])
+                comfy.supported_models.models = models
+
+                model_config = model_config_from_unet_config(unet_config, sd)
+                assert model_config is not None
+                assert type(model_config).__name__ == "LongCatImage", (
+                    f"Expected LongCatImage with ordering={ordering}, "
+                    f"got {type(model_config).__name__}"
+                )
+        finally:
+            comfy.supported_models.models = original_models
 
     def test_longcat_comfyui_detected_as_longcat(self):
         sd = _make_longcat_comfyui_sd()

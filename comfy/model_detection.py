@@ -905,9 +905,16 @@ def detect_unet_config(state_dict, key_prefix, metadata=None):
     return unet_config
 
 def model_config_from_unet_config(unet_config, state_dict=None):
+    best_match = None
+    best_score = -1
     for model_config in comfy.supported_models.models:
-        if model_config.matches(unet_config, state_dict):
-            return model_config(unet_config)
+        score = model_config.match_score(unet_config, state_dict)
+        if score > best_score:
+            best_score = score
+            best_match = model_config
+
+    if best_match is not None:
+        return best_match(unet_config)
 
     logging.error("no match {}".format(unet_config))
     return None

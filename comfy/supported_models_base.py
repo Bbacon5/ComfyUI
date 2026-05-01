@@ -54,15 +54,31 @@ class BASE:
     optimizations = {"fp8": False}
 
     @classmethod
-    def matches(s, unet_config, state_dict=None):
+    def match_score(s, unet_config, state_dict=None):
+        """Return a non-negative specificity score if this model matches the given
+        ``unet_config``/``state_dict``, otherwise ``-1``.
+
+        The score is the total number of ``unet_config`` keys (plus ``required_keys``
+        when ``state_dict`` is provided) that this model declares and that match the
+        input. Higher scores indicate a more specific match, allowing
+        :func:`model_config_from_unet_config` to prefer the most specific model when
+        several configs would otherwise match by subset.
+        """
+        score = 0
         for k in s.unet_config:
             if k not in unet_config or s.unet_config[k] != unet_config[k]:
-                return False
+                return -1
+            score += 1
         if state_dict is not None:
             for k in s.required_keys:
                 if k not in state_dict:
-                    return False
-        return True
+                    return -1
+                score += 1
+        return score
+
+    @classmethod
+    def matches(s, unet_config, state_dict=None):
+        return s.match_score(unet_config, state_dict) >= 0
 
     def model_type(self, state_dict, prefix=""):
         return model_base.ModelType.EPS
