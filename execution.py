@@ -816,6 +816,8 @@ class PromptExecutor:
         finally:
             comfy.memory_management.set_ram_cache_release_state(None, 0)
             self._notify_prompt_lifecycle("end", prompt_id)
+            self.server.last_workflow_id = None
+            self.workflow_id = None
 
 
 async def validate_inputs(prompt_id, prompt, item, validated, visiting=None):
