@@ -5,8 +5,8 @@ from comfy.cli_args import args
 
 if args.list_feature_flags:
     import json
-    from comfy_api.feature_flags import get_cli_feature_flag_registry
-    print(json.dumps(get_cli_feature_flag_registry(), indent=2))  # noqa: T201
+    from comfy_api.feature_flags import CLI_FEATURE_FLAG_REGISTRY
+    print(json.dumps(CLI_FEATURE_FLAG_REGISTRY, indent=2))  # noqa: T201
     raise SystemExit(0)
 
 import os

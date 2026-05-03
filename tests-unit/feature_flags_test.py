@@ -4,7 +4,7 @@ from comfy_api.feature_flags import (
     get_connection_feature,
     supports_feature,
     get_server_features,
-    get_cli_feature_flag_registry,
+    CLI_FEATURE_FLAG_REGISTRY,
     SERVER_FEATURE_FLAGS,
     _coerce_flag_value,
     _parse_cli_feature_flags,
@@ -116,6 +116,15 @@ class TestCoerceFlagValue:
         assert _coerce_flag_value("unknown_flag", "true") == "true"
         assert _coerce_flag_value("unknown_flag", "42") == "42"
 
+    def test_failed_coercion_falls_back_to_string(self, monkeypatch):
+        """Malformed values for typed flags must not crash; raw string is returned."""
+        monkeypatch.setitem(
+            CLI_FEATURE_FLAG_REGISTRY,
+            "test_int_flag",
+            {"type": "int", "default": 0, "description": "test"},
+        )
+        assert _coerce_flag_value("test_int_flag", "not_a_number") == "not_a_number"
+
 
 class TestParseCliFeatureFlags:
     """Test suite for _parse_cli_feature_flags."""
@@ -125,8 +134,14 @@ class TestParseCliFeatureFlags:
         result = _parse_cli_feature_flags()
         assert result == {"show_signin_button": True}
 
-    def test_missing_equals_skipped(self, monkeypatch):
-        monkeypatch.setattr("comfy_api.feature_flags.args", type("Args", (), {"feature_flag": ["noequals", "valid=1"]})())
+    def test_missing_equals_defaults_to_true(self, monkeypatch):
+        """Bare flag without '=' is treated as the string 'true' (and coerced if registered)."""
+        monkeypatch.setattr("comfy_api.feature_flags.args", type("Args", (), {"feature_flag": ["show_signin_button", "valid=1"]})())
+        result = _parse_cli_feature_flags()
+        assert result == {"show_signin_button": True, "valid": "1"}
+
+    def test_empty_key_skipped(self, monkeypatch):
+        monkeypatch.setattr("comfy_api.feature_flags.args", type("Args", (), {"feature_flag": ["=value", "valid=1"]})())
         result = _parse_cli_feature_flags()
         assert result == {"valid": "1"}
 
@@ -135,7 +150,7 @@ class TestCliFeatureFlagRegistry:
     """Test suite for the CLI feature flag registry."""
 
     def test_registry_entries_have_required_fields(self):
-        for key, info in get_cli_feature_flag_registry().items():
+        for key, info in CLI_FEATURE_FLAG_REGISTRY.items():
             assert "type" in info, f"{key} missing 'type'"
             assert "default" in info, f"{key} missing 'default'"
             assert "description" in info, f"{key} missing 'description'"

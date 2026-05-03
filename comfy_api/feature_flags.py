@@ -5,6 +5,7 @@ This module handles capability negotiation between frontend and backend,
 allowing graceful protocol evolution while maintaining backward compatibility.
 """
 
+import logging
 from typing import Any, TypedDict
 
 from comfy.cli_args import args
@@ -27,11 +28,6 @@ CLI_FEATURE_FLAG_REGISTRY: dict[str, FeatureFlagInfo] = {
 }
 
 
-def get_cli_feature_flag_registry() -> dict[str, FeatureFlagInfo]:
-    """Return the registry of known CLI-settable feature flags."""
-    return {k: dict(v) for k, v in CLI_FEATURE_FLAG_REGISTRY.items()}
-
-
 _COERCE_FNS: dict[str, Any] = {
     "bool": lambda v: v.lower() == "true",
     "int": lambda v: int(v),
@@ -40,26 +36,41 @@ _COERCE_FNS: dict[str, Any] = {
 
 
 def _coerce_flag_value(key: str, raw_value: str) -> Any:
-    """Coerce a raw string value using the registry type, or keep as string."""
+    """Coerce a raw string value using the registry type, or keep as string.
+
+    Returns the raw string if the key is unregistered, the type is unknown,
+    or coercion fails (with a warning logged in the failure case).
+    """
     info = CLI_FEATURE_FLAG_REGISTRY.get(key)
     if info is None:
         return raw_value
     coerce = _COERCE_FNS.get(info["type"])
     if coerce is None:
         return raw_value
-    return coerce(raw_value)
+    try:
+        return coerce(raw_value)
+    except (ValueError, TypeError):
+        logging.warning(
+            "Could not coerce --feature-flag %s=%r to %s; using raw string.",
+            key, raw_value, info["type"],
+        )
+        return raw_value
 
 
 def _parse_cli_feature_flags() -> dict[str, Any]:
-    """Parse --feature-flag key=value pairs from CLI args into a dict."""
+    """Parse --feature-flag key=value pairs from CLI args into a dict.
+
+    Items without '=' default to the value 'true' (bare flag form).
+    """
     result: dict[str, Any] = {}
     for item in getattr(args, "feature_flag", []):
-        if "=" not in item:
-            continue
-        key, _, raw_value = item.partition("=")
+        key, sep, raw_value = item.partition("=")
         key = key.strip()
-        if key:
-            result[key] = _coerce_flag_value(key, raw_value.strip())
+        if not key:
+            continue
+        if not sep:
+            raw_value = "true"
+        result[key] = _coerce_flag_value(key, raw_value.strip())
     return result
 
 
