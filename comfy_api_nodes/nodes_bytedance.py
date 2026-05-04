@@ -1948,7 +1948,7 @@ async def process_video_task(
 
 
 def _seedance_group_picker_input() -> IO.Combo.Input:
-    """Combo populated from /proxy/seedance/groups. Empty selection triggers H5 enrollment."""
+    """Combo populated from /proxy/seedance/visual-validate/groups. Empty selection triggers H5 enrollment."""
     return IO.Combo.Input(
         "group_id",
         default="",
@@ -1957,7 +1957,7 @@ def _seedance_group_picker_input() -> IO.Combo.Input:
             "authentication and create a new group."
         ),
         remote_combo=IO.RemoteComboOptions(
-            route="/proxy/seedance/groups",
+            route="/proxy/seedance/visual-validate/groups",
             response_key="groups",
             item_schema=IO.RemoteItemSchema(
                 value_field="group_id",
