@@ -4,18 +4,17 @@ import os
 
 import pytest
 
-from comfy import deploy_environment
 from comfy.deploy_environment import get_deploy_environment
 
 
 @pytest.fixture(autouse=True)
 def _reset_cache_and_base_path(tmp_path, monkeypatch):
-    """Reset the module cache and point folder_paths.base_path at a tmp dir for each test."""
-    monkeypatch.setattr(deploy_environment, "_cached_value", None)
+    """Reset the functools cache and point folder_paths.base_path at a tmp dir for each test."""
+    get_deploy_environment.cache_clear()
     import folder_paths
     monkeypatch.setattr(folder_paths, "base_path", str(tmp_path))
     yield
-    monkeypatch.setattr(deploy_environment, "_cached_value", None)
+    get_deploy_environment.cache_clear()
 
 
 def _write_env_file(tmp_path, content: str) -> str:
