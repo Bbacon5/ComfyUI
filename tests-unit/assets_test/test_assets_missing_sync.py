@@ -41,6 +41,7 @@ def test_seed_asset_removed_when_file_is_deleted(
     matches = [a for a in body1.get("assets", []) if a.get("name") == name]
     assert matches
     assert matches[0].get("asset_hash") is None
+    assert matches[0].get("hash") is None
     asset_info_id = matches[0]["id"]
 
     # Remove the underlying file and sync again

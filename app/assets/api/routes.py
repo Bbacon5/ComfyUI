@@ -163,6 +163,7 @@ def _build_asset_response(result: schemas.AssetDetailResult | schemas.UploadResu
     return schemas_out.Asset(
         id=result.ref.id,
         name=result.ref.name,
+        hash=result.asset.hash if result.asset else None,
         asset_hash=result.asset.hash if result.asset else None,
         size=int(result.asset.size_bytes) if result.asset else None,
         mime_type=result.asset.mime_type if result.asset else None,
