@@ -2602,25 +2602,20 @@ paths:
                 $ref: "#/components/schemas/CloudError"
 
   /api/assets/remote-metadata:
-    post:
+    get:
       operationId: getAssetRemoteMetadata
       tags: [assets]
       summary: Fetch metadata for a remote asset URL
       description: "[cloud-only] Fetches and returns metadata (content type, size, filename) for a remote URL without downloading the full content."
       x-runtime: [cloud]
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - url
-              properties:
-                url:
-                  type: string
-                  format: uri
-                  description: URL to inspect
+      parameters:
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uri
+          description: URL to inspect
       responses:
         "200":
           description: Remote metadata
@@ -3246,7 +3241,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CloudError"
-    put:
+    patch:
       operationId: updateCloudWorkflow
       tags: [workflows]
       summary: Update a cloud workflow
@@ -4277,7 +4272,7 @@ paths:
                 $ref: "#/components/schemas/CloudError"
 
   /api/workspace/members/{userId}:
-    put:
+    patch:
       operationId: updateWorkspaceMember
       tags: [workspace]
       summary: Update a workspace member's role
@@ -4468,7 +4463,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CloudError"
-    put:
+    patch:
       operationId: updateWorkspace
       tags: [workspace]
       summary: Update workspace settings
@@ -4580,48 +4575,51 @@ paths:
                 $ref: "#/components/schemas/CloudError"
 
   /api/files/mask-layers:
-    post:
-      operationId: uploadMaskLayers
-      tags: [upload]
-      summary: Upload mask layer files
-      description: "[cloud-only] Uploads mask layer image files for use in inpainting and compositing workflows."
+    get:
+      operationId: getMaskLayers
+      tags: [assets]
+      summary: Get related mask layer filenames
+      description: "[cloud-only] Given a mask file (any of the 4 layers), returns all related mask layer filenames. Used by the mask editor to load the paint, mask, and painted layers when reopening a previously edited mask."
       x-runtime: [cloud]
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              required:
-                - files
-              properties:
-                files:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
-                  description: Mask layer image files
-                prompt_id:
-                  type: string
-                  format: uuid
-                  description: Associated prompt ID
+      parameters:
+        - name: filename
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Hash filename of any mask layer file
       responses:
         "200":
-          description: Files uploaded
+          description: Related mask layers
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/UploadResult"
-        "400":
-          description: Bad request
+                type: object
+                properties:
+                  mask:
+                    type: string
+                    description: Filename of the mask layer
+                    nullable: true
+                  paint:
+                    type: string
+                    description: Filename of the paint strokes layer
+                    nullable: true
+                  painted:
+                    type: string
+                    description: Filename of the painted image layer
+                    nullable: true
+                  painted_masked:
+                    type: string
+                    description: Filename of the final composite layer
+                    nullable: true
+        "401":
+          description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/CloudError"
-        "401":
-          description: Unauthorized
+        "404":
+          description: File not found or not a mask file
           content:
             application/json:
               schema:
