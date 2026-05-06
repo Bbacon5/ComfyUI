@@ -72,6 +72,8 @@ tags:
     description: "ComfyUI Hub: profiles, shared workflows, and labels (cloud-only)"
   - name: workflows
     description: Cloud workflow management and versioning (cloud-only)
+  - name: task
+    description: Background task management (cloud-only)
 
 paths:
   # ---------------------------------------------------------------------------
@@ -2891,6 +2893,49 @@ paths:
                     type: integer
                   has_more:
                     type: boolean
+    post:
+      operationId: createHubProfile
+      tags: [hub]
+      summary: Create a Hub profile
+      description: "[cloud-only] Creates a hub profile for the specified workspace. Username is immutable after creation."
+      x-runtime: [cloud]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateHubProfileRequest"
+      responses:
+        "201":
+          description: Hub profile created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HubProfile"
+        "400":
+          description: Bad request (e.g. invalid username)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "409":
+          description: Username already taken or profile already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
 
   /api/hub/profiles/{username}:
     get:
@@ -3066,6 +3111,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HubWorkflowList"
+    post:
+      operationId: publishHubWorkflow
+      tags: [hub]
+      summary: Publish a workflow to the hub
+      description: "[cloud-only] Publishes a workflow to the hub with metadata, thumbnail, and sample images."
+      x-runtime: [cloud]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublishHubWorkflowRequest"
+      responses:
+        "200":
+          description: Workflow published to hub
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HubWorkflowDetail"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "404":
+          description: Workflow or profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
 
   /api/hub/workflows/{share_id}:
     get:
@@ -3090,6 +3172,34 @@ paths:
                 $ref: "#/components/schemas/HubWorkflow"
         "404":
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+    delete:
+      operationId: deleteHubWorkflow
+      tags: [hub]
+      summary: Unpublish a workflow from the hub
+      description: "[cloud-only] Removes a workflow from the hub listing."
+      x-runtime: [cloud]
+      parameters:
+        - name: share_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Workflow share ID
+      responses:
+        "204":
+          description: Successfully unpublished
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "404":
+          description: Workflow not found
           content:
             application/json:
               schema:
@@ -3508,6 +3618,57 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CloudError"
+    post:
+      operationId: createCloudWorkflowVersion
+      tags: [workflows]
+      summary: Create a new cloud workflow version
+      description: "[cloud-only] Creates a new workflow version with updated workflow JSON. Uses optimistic concurrency via base_version."
+      x-runtime: [cloud]
+      parameters:
+        - name: workflow_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The workflow ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkflowVersionRequest"
+      responses:
+        "201":
+          description: Version created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowVersionResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "403":
+          description: Forbidden — not the workflow owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "409":
+          description: Version conflict — base_version does not match latest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
 
   /api/workflows/published/{share_id}:
     get:
@@ -3560,6 +3721,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CloudError"
+    post:
+      operationId: createAuthSession
+      tags: [auth]
+      summary: Create a session cookie
+      description: "[cloud-only] Creates a session cookie from the bearer token in the Authorization header. Returns a Set-Cookie header with a secure HttpOnly session cookie. Cookie authentication is not allowed for this endpoint."
+      x-runtime: [cloud]
+      responses:
+        "200":
+          description: Session created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateSessionResponse"
+        "400":
+          description: Bad request — invalid or expired ID token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+    delete:
+      operationId: deleteAuthSession
+      tags: [auth]
+      summary: Delete session cookie (logout)
+      description: "[cloud-only] Clears the session cookie and optionally revokes the session on the server."
+      x-runtime: [cloud]
+      responses:
+        "200":
+          description: Session deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeleteSessionResponse"
 
   /api/auth/token:
     post:
@@ -4270,6 +4469,39 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CloudError"
+    delete:
+      operationId: bulkRevokeMemberApiKeys
+      tags: [workspace]
+      summary: Bulk revoke a member's API keys
+      description: "[cloud-only] Revokes all active API keys for a specific workspace member. Only workspace owners can perform this action."
+      x-runtime: [cloud]
+      parameters:
+        - name: user_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+          description: The member's user ID.
+      responses:
+        "200":
+          description: Keys revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkRevokeAPIKeysResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "403":
+          description: Forbidden — must be workspace owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
 
   /api/workspace/members/{userId}:
     patch:
@@ -4507,6 +4739,40 @@ paths:
                 $ref: "#/components/schemas/CloudError"
         "403":
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+    delete:
+      operationId: deleteWorkspace
+      tags: [workspace]
+      summary: Delete a workspace
+      description: "[cloud-only] Soft-deletes a workspace. Requires owner role. Personal workspaces cannot be deleted."
+      x-runtime: [cloud]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The workspace ID.
+      responses:
+        "204":
+          description: Workspace deleted
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "403":
+          description: Forbidden — must be workspace owner
           content:
             application/json:
               schema:
@@ -4777,6 +5043,90 @@ paths:
                 $ref: "#/components/schemas/CloudError"
 
   /api/secrets/{id}:
+    get:
+      operationId: getSecret
+      tags: [settings]
+      summary: Get secret metadata
+      description: "[cloud-only] Returns metadata for a specific secret. Does not return the plaintext secret value."
+      x-runtime: [cloud]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The secret ID.
+      responses:
+        "200":
+          description: Secret metadata
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecretMeta"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+    patch:
+      operationId: updateSecret
+      tags: [settings]
+      summary: Update a secret
+      description: "[cloud-only] Updates an existing secret's name and/or value. Both fields are optional; only provided fields are updated."
+      x-runtime: [cloud]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The secret ID.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateSecretRequest"
+      responses:
+        "200":
+          description: Secret updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecretMeta"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "409":
+          description: Conflict — a secret with this name already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
     delete:
       operationId: deleteSecret
       tags: [settings]
@@ -4865,6 +5215,38 @@ paths:
                 $ref: "#/components/schemas/CloudError"
 
   /api/userdata/{file}/publish:
+    get:
+      operationId: getUserdataFilePublish
+      tags: [userdata]
+      summary: Get publish info for a userdata file
+      description: "[cloud-only] Returns the publish status and share info for a userdata workflow file."
+      x-runtime: [cloud]
+      parameters:
+        - name: file
+          in: path
+          required: true
+          schema:
+            type: string
+          description: File path relative to user data directory
+      responses:
+        "200":
+          description: Publish info (publish_time is null if never published)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkflowPublishInfo"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "404":
+          description: Workflow not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
     post:
       operationId: publishUserdataFile
       tags: [userdata]
@@ -5082,6 +5464,118 @@ paths:
                 $ref: "#/components/schemas/CloudError"
         "404":
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+
+  /api/tasks:
+    get:
+      operationId: listTasks
+      tags: [task]
+      summary: List background tasks
+      description: "[cloud-only] Retrieve a paginated list of background tasks for the authenticated user. Supports filtering by task type, status, and creation time."
+      x-runtime: [cloud]
+      parameters:
+        - name: task_name
+          in: query
+          schema:
+            type: string
+          description: Filter by task type name (exact match).
+        - name: idempotency_key
+          in: query
+          schema:
+            type: string
+          description: Filter by idempotency key (exact match).
+        - name: status
+          in: query
+          schema:
+            type: string
+          description: Filter by one or more statuses (comma-separated).
+        - name: created_after
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter tasks created after this timestamp.
+        - name: created_before
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter tasks created before this timestamp.
+        - name: sort_order
+          in: query
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+          description: Sort direction by create_time.
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Pagination offset (0-based).
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Maximum items per page (1-100).
+      responses:
+        "200":
+          description: Tasks retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TasksListResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+
+  /api/tasks/{task_id}:
+    get:
+      operationId: getTask
+      tags: [task]
+      summary: Get task details
+      description: "[cloud-only] Retrieve full details for a specific background task."
+      x-runtime: [cloud]
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Task identifier (UUID).
+      responses:
+        "200":
+          description: Task details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudError"
+        "404":
+          description: Task not found
           content:
             application/json:
               schema:
@@ -7336,9 +7830,361 @@ components:
           type: string
         name:
           type: string
+        provider:
+          type: string
+          description: "[cloud-only] Provider identifier (e.g., huggingface, civitai)."
+          x-runtime: [cloud]
+        last_used_at:
+          type: string
+          format: date-time
+          description: "[cloud-only] When the secret was last used for decryption."
+          x-runtime: [cloud]
         created_at:
           type: string
           format: date-time
         updated_at:
           type: string
           format: date-time
+
+    UpdateSecretRequest:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Request body for updating an existing user secret."
+      properties:
+        name:
+          type: string
+          description: New name for the secret
+        secret_value:
+          type: string
+          description: New secret value (API key, token, etc.)
+
+    CreateSessionResponse:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Response after creating a session cookie."
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+        expiresIn:
+          type: integer
+          description: Session expiration time in seconds.
+
+    DeleteSessionResponse:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Response after deleting a session cookie."
+      required:
+        - success
+      properties:
+        success:
+          type: boolean
+
+    CreateHubProfileRequest:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Request body for creating a new Hub profile."
+      required:
+        - workspace_id
+        - username
+      properties:
+        workspace_id:
+          type: string
+        username:
+          type: string
+          description: Unique URL-safe slug. Immutable after creation.
+        display_name:
+          type: string
+        description:
+          type: string
+        avatar_token:
+          type: string
+        website_urls:
+          type: array
+          items:
+            type: string
+
+    PublishHubWorkflowRequest:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Request body for publishing or updating a workflow on the Hub."
+      required:
+        - username
+        - name
+        - workflow_filename
+        - asset_ids
+      properties:
+        username:
+          type: string
+        name:
+          type: string
+        workflow_filename:
+          type: string
+        asset_ids:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        models:
+          type: array
+          items:
+            type: string
+        custom_nodes:
+          type: array
+          items:
+            type: string
+        tutorial_url:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        thumbnail_type:
+          type: string
+          enum: [image, video, image_comparison]
+        thumbnail_token_or_url:
+          type: string
+        thumbnail_comparison_token_or_url:
+          type: string
+        sample_image_tokens_or_urls:
+          type: array
+          items:
+            type: string
+
+    HubWorkflowDetail:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Full Hub workflow detail including versions, assets, and statistics."
+      required:
+        - share_id
+        - workflow_id
+        - name
+        - workflow_json
+        - assets
+        - profile
+        - status
+      properties:
+        share_id:
+          type: string
+        workflow_id:
+          type: string
+        name:
+          type: string
+        status:
+          type: string
+          enum: [pending, approved, rejected, deprecated]
+        description:
+          type: string
+        thumbnail_type:
+          type: string
+          enum: [image, video, image_comparison]
+        thumbnail_url:
+          type: string
+        thumbnail_comparison_url:
+          type: string
+        tutorial_url:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+        sample_image_urls:
+          type: array
+          items:
+            type: string
+        publish_time:
+          type: string
+          format: date-time
+          nullable: true
+        workflow_json:
+          type: object
+          additionalProperties: true
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetInfo"
+        profile:
+          $ref: "#/components/schemas/HubProfile"
+
+    AssetInfo:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Lightweight asset reference used in workflow publishing payloads."
+      required:
+        - id
+        - filename
+      properties:
+        id:
+          type: string
+        filename:
+          type: string
+        mime_type:
+          type: string
+        size_bytes:
+          type: integer
+          format: int64
+
+    BulkRevokeAPIKeysResponse:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Response after bulk-revoking API keys for a workspace member."
+      required:
+        - revoked_count
+      properties:
+        revoked_count:
+          type: integer
+          minimum: 0
+
+    CreateWorkflowVersionRequest:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Request body for creating a new version of a saved workflow."
+      required:
+        - base_version
+        - workflow_json
+      properties:
+        base_version:
+          type: integer
+          description: Version number this change is based on (for optimistic concurrency).
+        workflow_json:
+          type: object
+          additionalProperties: true
+
+    WorkflowVersionResponse:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Metadata for a single workflow version."
+      required:
+        - id
+        - version
+        - latest_version
+        - created_by
+        - created_at
+      properties:
+        id:
+          type: string
+        version:
+          type: integer
+        latest_version:
+          type: integer
+        created_by:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    WorkflowPublishInfo:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Publishing metadata for a workflow shared to the Hub."
+      required:
+        - workflow_id
+        - share_id
+        - listed
+        - assets
+      properties:
+        workflow_id:
+          type: string
+        share_id:
+          type: string
+        publish_time:
+          type: string
+          format: date-time
+          nullable: true
+        listed:
+          type: boolean
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/AssetInfo"
+
+    TaskEntry:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Task data for list views."
+      required:
+        - id
+        - task_name
+        - status
+        - create_time
+      properties:
+        id:
+          type: string
+          format: uuid
+        task_name:
+          type: string
+        status:
+          type: string
+          enum: [created, running, completed, failed]
+        create_time:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+
+    TaskResponse:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Full task details including payload and result."
+      required:
+        - id
+        - idempotency_key
+        - task_name
+        - payload
+        - status
+        - create_time
+        - update_time
+      properties:
+        id:
+          type: string
+          format: uuid
+        idempotency_key:
+          type: string
+        task_name:
+          type: string
+        payload:
+          type: object
+          additionalProperties: true
+        status:
+          type: string
+          enum: [created, running, completed, failed]
+        result:
+          type: object
+          additionalProperties: true
+        create_time:
+          type: string
+          format: date-time
+        update_time:
+          type: string
+          format: date-time
+        started_at:
+          type: string
+          format: date-time
+        completed_at:
+          type: string
+          format: date-time
+        error:
+          type: string
+
+    TasksListResponse:
+      type: object
+      x-runtime: [cloud]
+      description: "[cloud-only] Paginated list of background tasks for the authenticated user."
+      required:
+        - tasks
+        - pagination
+      properties:
+        tasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/TaskEntry"
+        pagination:
+          $ref: "#/components/schemas/PaginationInfo"
