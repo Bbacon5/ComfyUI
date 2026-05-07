@@ -108,3 +108,46 @@ def test_set_preview_invalid_preview_id(
     body = r.json()
     assert r.status_code == 404
     assert body["error"]["code"] == "ASSET_NOT_FOUND"
+
+
+def test_clear_preview_idempotent_when_no_preview_set(
+    http: requests.Session, api_base: str, asset_factory, make_asset_bytes
+):
+    """DELETE /api/assets/{id}/preview returns 204 even if no preview was previously set."""
+    main_data = make_asset_bytes("main_idem_clear.png", 2048)
+    main = asset_factory("main_idem_clear.png", ["input", "unit-tests"], {}, main_data)
+
+    # Asset has no preview at this point — DELETE should still succeed.
+    r_first = http.delete(f"{api_base}/api/assets/{main['id']}/preview", timeout=120)
+    assert r_first.status_code == 204, r_first.text
+
+    # And a second DELETE on the same asset should also be a 204 no-op.
+    r_second = http.delete(f"{api_base}/api/assets/{main['id']}/preview", timeout=120)
+    assert r_second.status_code == 204, r_second.text
+
+
+def test_set_preview_idempotent_with_same_id(
+    http: requests.Session, api_base: str, asset_factory, make_asset_bytes
+):
+    """PUT /api/assets/{id}/preview with the same preview_id twice is a 200 no-op."""
+    main_data = make_asset_bytes("main_idem_set.png", 2048)
+    preview_data = make_asset_bytes("prev_idem_set.png", 1024)
+
+    main = asset_factory("main_idem_set.png", ["input", "unit-tests"], {}, main_data)
+    preview = asset_factory("prev_idem_set.png", ["input", "unit-tests"], {}, preview_data)
+
+    r_first = http.put(
+        f"{api_base}/api/assets/{main['id']}/preview",
+        json={"preview_id": preview["id"]},
+        timeout=120,
+    )
+    assert r_first.status_code == 200, r_first.text
+    assert r_first.json()["preview_id"] == preview["id"]
+
+    r_second = http.put(
+        f"{api_base}/api/assets/{main['id']}/preview",
+        json={"preview_id": preview["id"]},
+        timeout=120,
+    )
+    assert r_second.status_code == 200, r_second.text
+    assert r_second.json()["preview_id"] == preview["id"]
