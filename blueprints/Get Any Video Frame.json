@@ -467,7 +467,8 @@
           }
         ],
         "extra": {},
-        "category": "Video Tools"
+        "category": "Video Tools",
+        "description": "Extracts one image frame from a video at a chosen index, with optional trim and FPS control."
       }
     ]
   },

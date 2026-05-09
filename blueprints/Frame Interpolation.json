@@ -849,7 +849,8 @@
           }
         ],
         "extra": {},
-        "category": "Video Tools"
+        "category": "Video Tools",
+        "description": "Increases video frame rate by synthesizing intermediate frames with a frame interpolation model."
       }
     ]
   },

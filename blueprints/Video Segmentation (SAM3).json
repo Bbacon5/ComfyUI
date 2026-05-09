@@ -818,7 +818,8 @@
           }
         ],
         "extra": {},
-        "category": "Video Tools"
+        "category": "Video Tools",
+        "description": "Segments video into temporally consistent masks using Meta SAM3 from text or interactive prompts."
       }
     ]
   },

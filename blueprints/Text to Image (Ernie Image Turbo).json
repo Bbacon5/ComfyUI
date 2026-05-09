@@ -2101,7 +2101,8 @@
           }
         ],
         "extra": {},
-        "category": "Image generation and editing/Text to image"
+        "category": "Image generation and editing/Text to image",
+        "description": "Generates images from text prompts using ERNIE Image Turbo with bundled encoders and VAE."
       }
     ]
   },

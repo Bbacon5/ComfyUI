@@ -703,7 +703,8 @@
           }
         ],
         "extra": {},
-        "category": "Image Tools/Image Segmentation"
+        "category": "Image Tools/Image Segmentation",
+        "description": "Segments images into masks using Meta SAM3 from text prompts, points, or boxes."
       }
     ]
   },

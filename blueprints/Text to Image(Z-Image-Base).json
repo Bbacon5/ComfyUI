@@ -1178,7 +1178,8 @@
         "extra": {
           "workflowRendererVersion": "LG"
         },
-        "category": "Image generation and editing/Text to image"
+        "category": "Image generation and editing/Text to image",
+        "description": "Generates images from text prompts using Z-Image base weights with Qwen3 text encoder and bundled VAE."
       }
     ]
   },
