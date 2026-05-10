@@ -1,21 +1,21 @@
 {
   "revision": 0,
-  "last_node_id": 76,
+  "last_node_id": 126,
   "last_link_id": 0,
   "nodes": [
     {
-      "id": 76,
-      "type": "9b9009e4-2d3d-445f-9be5-6063f465757e",
+      "id": 126,
+      "type": "8a2bb267-5858-4aaf-bdcd-61002711af19",
       "pos": [
-        300,
-        -170
+        -2280,
+        2850
       ],
       "size": [
         410,
         560
       ],
       "flags": {},
-      "order": 2,
+      "order": 1,
       "mode": 0,
       "inputs": [
         {
@@ -154,7 +154,7 @@
         "secondTabWidth": 65
       },
       "widgets_values": [],
-      "title": "Text to Image(Z-Image-Base)"
+      "title": "Text to Image (Z-Image-Base)"
     }
   ],
   "links": [],
@@ -162,17 +162,18 @@
   "definitions": {
     "subgraphs": [
       {
-        "id": "9b9009e4-2d3d-445f-9be5-6063f465757e",
+        "id": "8a2bb267-5858-4aaf-bdcd-61002711af19",
         "version": 1,
         "state": {
-          "lastGroupId": 6,
-          "lastNodeId": 93,
-          "lastLinkId": 121,
+          "lastGroupId": 16,
+          "lastNodeId": 126,
+          "lastLinkId": 229,
           "lastRerouteId": 0
         },
         "revision": 0,
         "config": {},
-        "name": "Text to Image(Z-Image-Base)",
+        "name": "Text to Image (Z-Image-Base)",
+        "description": "Generates images from text prompts using Z-Image base weights with Qwen3 text encoder and bundled VAE.",
         "inputNode": {
           "id": -10,
           "bounding": [
@@ -971,13 +972,13 @@
             "mode": 0,
             "inputs": [],
             "outputs": [],
-            "title": "Original Settings",
             "properties": {},
             "widgets_values": [
               "- Steps: 30～50\n- cfg:  3～5"
             ],
             "color": "#222",
-            "bgcolor": "#000"
+            "bgcolor": "#000",
+            "title": "Original Settings"
           }
         ],
         "groups": [
@@ -991,7 +992,6 @@
               287.9999544955691
             ],
             "color": "#3f789e",
-            "font_size": 24,
             "flags": {}
           },
           {
@@ -1004,7 +1004,6 @@
               700
             ],
             "color": "#3f789e",
-            "font_size": 24,
             "flags": {}
           },
           {
@@ -1017,7 +1016,6 @@
               700
             ],
             "color": "#3f789e",
-            "font_size": 24,
             "flags": {}
           }
         ],
@@ -1178,8 +1176,7 @@
         "extra": {
           "workflowRendererVersion": "LG"
         },
-        "category": "Image generation and editing/Text to image",
-        "description": "Generates images from text prompts using Z-Image base weights with Qwen3 text encoder and bundled VAE."
+        "category": "Image generation and editing/Text to image"
       }
     ]
   },
