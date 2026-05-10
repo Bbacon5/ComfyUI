@@ -595,7 +595,7 @@ class BatchMasksNode(io.ComfyNode):
             node_id="BatchMasksNode",
             search_aliases=["combine masks", "stack masks", "merge masks"],
             display_name="Batch Masks",
-            category="mask",
+            category="image/mask",
             inputs=[
                 io.Autogrow.Input("masks", template=autogrow_template)
             ],

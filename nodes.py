@@ -1771,7 +1771,7 @@ class LoadImageMask(LoadImage):
             }
         }
 
-    CATEGORY = "mask"
+    CATEGORY = "image/mask"
     RETURN_TYPES = ("MASK",)
     FUNCTION = "load_image_mask"
 
