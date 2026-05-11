@@ -691,7 +691,7 @@ class LoraLoader:
     FUNCTION = "load_lora"
 
     CATEGORY = "loaders"
-    DESCRIPTION = "LoRAs are used to modify diffusion and CLIP models, altering the way in which latents are denoised such as applying styles. Multiple LoRA nodes can be linked together."
+    DESCRIPTION = "This LoRA loader is used to modify both diffusion and CLIP models, altering the way in which latents are denoised such as applying styles. Multiple LoRA nodes can be linked together."
     SEARCH_ALIASES = ["lora", "load lora", "apply lora", "lora loader", "lora model"]
 
     def load_lora(self, model, clip, lora_name, strength_model, strength_clip):
@@ -721,6 +721,7 @@ class LoraLoaderModelOnly(LoraLoader):
                               "strength_model": ("FLOAT", {"default": 1.0, "min": -100.0, "max": 100.0, "step": 0.01}),
                               }}
     RETURN_TYPES = ("MODEL",)
+    DESCRIPTION = "This LoRAs loader is used to modify the diffusion model, altering the way in which latents are denoised such as applying styles. Multiple LoRA nodes can be linked together."
     FUNCTION = "load_lora_model_only"
 
     def load_lora_model_only(self, model, lora_name, strength_model):
