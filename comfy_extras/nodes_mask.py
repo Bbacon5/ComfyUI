@@ -93,7 +93,7 @@ class ImageCompositeMasked(IO.ComfyNode):
             node_id="ImageCompositeMasked",
             search_aliases=["overlay", "layer", "paste image", "images composition"],
             display_name="Image Composite Masked",
-            category="image",
+            category="image/compositing",
             inputs=[
                 IO.Image.Input("source"),
                 IO.Int.Input("x", default=0, min=0, max=nodes.MAX_RESOLUTION, step=1),
